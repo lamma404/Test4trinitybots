@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.drive.RR_MecanumDrive;
 
 @TeleOp(group = "PowerPlay_Driver")
 @Disabled
-public class PP_DrvCrtl_RR extends OpMode {
+public class PP_DrvCtrl_RR extends OpMode {
     RR_MecanumDrive m_drivetrain;
     
     @Override

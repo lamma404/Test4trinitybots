@@ -77,7 +77,7 @@ public class PP_HWTest_OdometryStrafeLeft extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        double max_power = 0.1; // slow speed - voltage
+        double max_power = 0.4; // slow speed - voltage
         double MAX_TIME = 3.0; // time ellapse
 
         StringBuffer logString = new StringBuffer();

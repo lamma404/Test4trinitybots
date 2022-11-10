@@ -5,10 +5,14 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.RR_MecanumDrive;
+import org.firstinspires.ftc.teamcode.elevator.ElevatorConstants;
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetector;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -18,7 +22,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 /* == Autonomous option 1 ==
- * [Name on driver station]  PowerPlay:Auton_Opt1
+ * [Name on driver station]
  *
  * [Functions] - within 30 seconds
  * 1. Use the camera to detect the signals on the self-made sleeve
@@ -27,9 +31,13 @@ import java.util.ArrayList;
  *
  * * */
 @Autonomous(group="PowerPlay_Auton")
-public class PP_Auton_Opt1 extends LinearOpMode {
+public class PP_Auton_Opt1_L extends LinearOpMode {
     // drivetrain
     private RR_MecanumDrive m_drivetrain = null;
+
+    /* elevator */
+    private DcMotorEx m_elevatorMotor = null;
+
 
     // clamp
     private Servo m_clampServo = null;
@@ -72,18 +80,37 @@ public class PP_Auton_Opt1 extends LinearOpMode {
         m_clampServo = hardwareMap.get(Servo.class, BotConfig.SERVO_CLAMP);
         m_clampServo.setPosition(BotConfig.SERVO_CLOSE_POS);
 
+        /* initlizate elevator */
+        m_elevatorMotor = hardwareMap.get(DcMotorEx.class,BotConfig.MOTOR_ELEVATOR);
+        m_elevatorMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m_elevatorMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        m_elevatorMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        m_elevatorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // get the PID coefficients for the RUN_USING_ENCODER  modes.
+        PIDFCoefficients pidfOrig = m_elevatorMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // change coefficients using methods included with DcMotorEx class.
+        m_elevatorMotor.setVelocityPIDFCoefficients(ElevatorConstants.NEW_P, ElevatorConstants.NEW_I, ElevatorConstants.NEW_D, ElevatorConstants.NEW_F);
+        m_elevatorMotor.setPositionPIDFCoefficients(ElevatorConstants.NEW_P_POSITION);
+
+        // re-read coefficients and verify change.
+        PIDFCoefficients pidfModified = m_elevatorMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
         // Initialize the trajectories
         Trajectory trajectory_groundJunction = m_drivetrain.trajectoryBuilder(new Pose2d())
-                .back(14)
+                .back(13.5)
                 .build();
-        Trajectory trajectory_groundJunctiontask2 = m_drivetrain.trajectoryBuilder(trajectory_groundJunction.end().plus(new Pose2d(0,0,Math.toRadians(90))))
+        Trajectory trajectory_groundJunctiontask2 = m_drivetrain.trajectoryBuilder(trajectory_groundJunction.end().plus(new Pose2d(0,0,Math.toRadians(-90))))
                 .forward(4)
                 .build();
         Trajectory trajectory_groundJunctiontask3 = m_drivetrain.trajectoryBuilder(trajectory_groundJunctiontask2.end())
                 .back(5)
                 .build();
 
-        Trajectory trajectory_park = m_drivetrain.trajectoryBuilder(trajectory_groundJunctiontask3.end().plus(new Pose2d(0,0,Math.toRadians(90))))
+        Trajectory trajectory_park = m_drivetrain.trajectoryBuilder(trajectory_groundJunctiontask3.end().plus(new Pose2d(0,0,Math.toRadians(-90))))
                 .forward(10)
                 .build();
         Trajectory trajectory_parkLeft = m_drivetrain.trajectoryBuilder(trajectory_park.end())
@@ -133,8 +160,8 @@ public class PP_Auton_Opt1 extends LinearOpMode {
                 telemetry.addLine("Don't see tag of interest!!!");
             }
 
-        telemetry.update();
-        sleep(20);
+            telemetry.update();
+            sleep(20);
         }
 
         /*
@@ -156,14 +183,14 @@ public class PP_Auton_Opt1 extends LinearOpMode {
         /* Actually do something useful */
         // firstly put the preload cone onto the ground junction
         m_drivetrain.followTrajectory(trajectory_groundJunction);
-        m_drivetrain.turn(Math.toRadians(90));
+        m_drivetrain.turn(Math.toRadians(-90));
         m_drivetrain.followTrajectory(trajectory_groundJunctiontask2);
         sleep(50);
         m_clampServo.setPosition(BotConfig.SERVO_OPEN_POS); //release the cone
         sleep(300);
 
         m_drivetrain.followTrajectory(trajectory_groundJunctiontask3);
-        m_drivetrain.turn(Math.toRadians(90));
+        m_drivetrain.turn(Math.toRadians(-90));
 
         // now park at the signal area
         m_drivetrain.followTrajectory(trajectory_park);
@@ -187,7 +214,7 @@ public class PP_Auton_Opt1 extends LinearOpMode {
         ArrayList<AprilTagDetection> currentDetections = m_aprilTagDetector.getLatestDetections();
         if(currentDetections.size() != 0)
         {
-           for(AprilTagDetection tag : currentDetections)
+            for(AprilTagDetection tag : currentDetections)
             {
                 if(tag.id == LEFT || tag.id == MIDDLE || tag.id == RIGHT)
                 {

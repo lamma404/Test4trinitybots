@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.auton_drvctrl;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -23,8 +24,9 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 * ... depending on the functionality and efficiency of the elevator & clamp structure, we may add a step to put a cone on a junction before parking.
 *
 * * */
+@Disabled
 @Autonomous(group="PowerPlay_Auton")
-public class PP_Auton_Opt2 extends LinearOpMode {
+public class PP_Auton_OldSleeveDetector extends LinearOpMode {
     RR_MecanumDrive m_drivetrain = null;
 
     private static final int  CAMERA_WIDTH = 320; // width  of wanted camera resolution

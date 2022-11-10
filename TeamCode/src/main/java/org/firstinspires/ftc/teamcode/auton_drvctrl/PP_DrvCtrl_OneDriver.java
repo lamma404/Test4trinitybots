@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.drive.MecanumDrive;
 import org.firstinspires.ftc.teamcode.elevator.ElevatorConstants;
 
 @TeleOp(group = "PowerPlay_Driver")
-public class PP_DrvCrtl_Opt1 extends OpMode {
+public class PP_DrvCtrl_OneDriver extends OpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
